@@ -1,4 +1,3 @@
-
 # Python
 __pycache__/
 *.py[cod]
@@ -6,15 +5,12 @@ __pycache__/
 venv/
 env/
 
-# Dataset and downloaded images
+# Datasets and images
 my_dataset/
+raw_data/
 *.jpg
 *.jpeg
 *.png
-
-# Trained model files
-*.pth
-*.pt
 
 # Local configuration
 .env
@@ -23,3 +19,5 @@ my_dataset/
 # IDE and OS files
 .vscode/
 .DS_Store
+
+# Note: *.pth and *.pt were removed so the model uploads to GitHub

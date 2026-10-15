@@ -1,53 +1,25 @@
-"""Custom CNN for Supercar vs SUV image classification."""
+"""Pretrained Transfer Learning Model for Car Classification."""
 import torch
 from torch import nn
+from torchvision.models import resnet18, ResNet18_Weights
 
-
-class CarCNN(nn.Module):
-    """
-    Input: RGB tensor shaped (N, 3, 224, 224).
-    Exactly three Conv2d -> ReLU -> MaxPool2d blocks,
-    then a 128-neuron fully connected layer and 2 output logits.
-    """
-
-    def __init__(self, num_classes: int = 2):
-        super().__init__()
-        if num_classes != 2:
-            raise ValueError("CarCNN is designed for exactly two classes.")
-
-        self.features = nn.Sequential(
-            # Block 1: 3 x 224 x 224 -> 16 x 112 x 112
-            nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-
-            # Block 2: 16 x 112 x 112 -> 32 x 56 x 56
-            nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-
-            # Block 3: 32 x 56 x 56 -> 64 x 28 x 28
-            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-        )
-
-        # 64 * 28 * 28 = 50,176 features for a 224 x 224 input.
-        self.classifier = nn.Sequential(
-            nn.Flatten(),
-            nn.Linear(64 * 28 * 28, 128),
-            nn.ReLU(inplace=True),
-            nn.Linear(128, 2),
-        )
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.features(x)
-        return self.classifier(x)
-
+def create_model(num_classes: int):
+    """Loads a pretrained ResNet-18 and replaces the classifier head."""
+    weights = ResNet18_Weights.DEFAULT
+    model = resnet18(weights=weights)
+    
+    # Freeze the base layers to speed up training
+    for param in model.parameters():
+        param.requires_grad = False
+        
+    # Replace the fully connected layer to output our specific number of classes.
+    model.fc = nn.Linear(model.fc.in_features, num_classes)
+    
+    return model, weights.transforms()
 
 if __name__ == "__main__":
-    model = CarCNN()
+    model, transform = create_model(num_classes=9)
     sample = torch.randn(2, 3, 224, 224)
     output = model(sample)
     print("Input shape:", tuple(sample.shape))
-    print("Output shape:", tuple(output.shape), "(batch size, 2 classes)")
+    print("Output shape:", tuple(output.shape), "(batch size, num_classes)")
