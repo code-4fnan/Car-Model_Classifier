@@ -1,0 +1,25 @@
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Dataset and downloaded images
+my_dataset/
+*.jpg
+*.jpeg
+*.png
+
+# Trained model files
+*.pth
+*.pt
+
+# Local configuration
+.env
+.streamlit/secrets.toml
+
+# IDE and OS files
+.vscode/
+.DS_Store
